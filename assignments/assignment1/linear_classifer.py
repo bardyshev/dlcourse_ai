@@ -2,7 +2,7 @@ import numpy as np
 
 
 def softmax(predictions):
-    '''
+    """
     Computes probabilities from scores
 
     Arguments:
@@ -12,14 +12,14 @@ def softmax(predictions):
     Returns:
       probs, np array of the same shape as predictions - 
         probability for every class, 0..1
-    '''
-    # TODO implement softmax
-    # Your final implementation shouldn't have any loops
-    raise Exception("Not implemented!")
+    """
+    predictions = np.exp(predictions - np.max(predictions))
+
+    return predictions / sum(predictions)
 
 
 def cross_entropy_loss(probs, target_index):
-    '''
+    """
     Computes cross-entropy loss
 
     Arguments:
@@ -30,14 +30,12 @@ def cross_entropy_loss(probs, target_index):
 
     Returns:
       loss: single value
-    '''
-    # TODO implement cross-entropy
-    # Your final implementation shouldn't have any loops
-    raise Exception("Not implemented!")
+    """
+    return -1 * np.log(probs[target_index])
 
 
 def softmax_with_cross_entropy(predictions, target_index):
-    '''
+    """
     Computes softmax and cross-entropy loss for model predictions,
     including the gradient
 
@@ -50,12 +48,27 @@ def softmax_with_cross_entropy(predictions, target_index):
     Returns:
       loss, single value - cross-entropy loss
       dprediction, np array same shape as predictions - gradient of predictions by loss value
-    '''
-    # TODO implement softmax with cross-entropy
-    # Your final implementation shouldn't have any loops
-    raise Exception("Not implemented!")
+    """
+    probs = softmax(predictions)
+    loss = cross_entropy_loss(probs, target_index)
 
-    return loss, dprediction
+    dprediction = []
+
+    for pos in range(probs.shape[0]):
+
+        preds_plus = predictions.copy()
+        preds_plus[pos] = preds_plus[pos] + 1e-5
+        probs_plus = softmax(preds_plus)
+
+        preds_minus = predictions.copy()
+        preds_minus[pos] = preds_minus[pos] - 1e-5
+        probs_minus = softmax(preds_minus)
+
+        gradient_comp = (cross_entropy_loss(probs_plus, target_index) - cross_entropy_loss(probs_minus, target_index)) / (2 * 1e-5)
+
+        dprediction.append(gradient_comp)
+
+    return loss, np.array(dprediction)
 
 
 def l2_regularization(W, reg_strength):
@@ -161,12 +174,3 @@ class LinearSoftmaxClassifier():
         raise Exception("Not implemented!")
 
         return y_pred
-
-
-
-                
-                                                          
-
-            
-
-                
